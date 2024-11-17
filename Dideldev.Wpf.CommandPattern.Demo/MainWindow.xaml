@@ -5,8 +5,157 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Dideldev.Wpf.CommandPattern.Demo"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        ResizeMode="NoResize"
+        
+        Title="DiskCommandManager Demo" Height="400" Width="720"
+        PreviewKeyDown="Window_PreviewKeyDown">
+    <Window.DataContext>
+        <local:MainViewModel/>
+    </Window.DataContext>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <GroupBox Header="Playground" Grid.Column="0" Margin="5">
+            <Grid Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" >
+                    <TextBlock TextWrapping="Wrap" Margin="5" TextAlignment="Center">
+                        Press any key or change the foreground and background to call comands.
+                    </TextBlock>
+                    <TextBlock TextWrapping="Wrap" Margin="5" TextAlignment="Center">
+                            Press Ctrl+Z to undo the last command and Ctrl+Y to redo it.
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Vertical" Grid.ColumnSpan="2">
+                    <TextBlock Text="Background:"/>
+                    <ComboBox 
+                        ItemsSource="{Binding AvailableColors}" 
+                        SelectedValuePath="Key"
+                        DisplayMemberPath="Value"
+                        SelectedValue="{Binding Background,Mode=TwoWay}"
+                        MinWidth="80"
+                        Margin="5 0"/>
+                    <TextBlock Text="Foreground:"/>
+                    <ComboBox 
+                        ItemsSource="{Binding AvailableColors}" 
+                        SelectedValuePath="Key"
+                        DisplayMemberPath="Value"
+                        SelectedValue="{Binding Foreground, Mode=TwoWay}"
+                        MinWidth="80"
+                        Margin="5 0"/>
+                </StackPanel>
 
+                <TextBlock 
+                    Grid.Row="2"
+                    FontSize="64"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="{Binding PressedKey}"
+                    Background="{Binding Background}"
+                    Foreground="{Binding Foreground}"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Debug" Grid.Column="1" Margin="5">
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.Resources>
+                    <Style TargetType="{x:Type ItemsControl}">
+                        <Setter Property="ItemsPanel">
+                            <Setter.Value>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical"/>
+                                </ItemsPanelTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Grid.Resources>
+
+                <StackPanel Grid.Column="0" >
+                    <TextBlock Text="Executed files" HorizontalAlignment="Stretch" Background="LightGray" TextAlignment="Center"/>
+                    <ItemsControl ItemsSource="{Binding ExecFilesOnFolder}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" >
+                    <TextBlock Text="Previous chunk" HorizontalAlignment="Stretch" Background="LightCyan" TextAlignment="Center"/>
+                    <ItemsControl ItemsSource="{Binding ListPrevious}" Margin="2">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:DebugCommandItem}">
+                                <TextBlock Text="{Binding Name}" Background="LightBlue" HorizontalAlignment="Stretch"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Current chunk" HorizontalAlignment="Stretch" Background="LightSeaGreen" TextAlignment="Center"/>
+                    <ItemsControl ItemsSource="{Binding ListCurrent}" Margin="2">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:DebugCommandItem}">
+                                <TextBlock Text="{Binding Name}" Background="LightBlue" HorizontalAlignment="Stretch">
+                                    <TextBlock.Style>
+                                        <Style TargetType="{x:Type TextBlock}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding LastExecuted}" Value="True">
+                                                    <Setter Property="Foreground" Value="Blue"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Undone}" Value="True">
+                                                    <Setter Property="Foreground" Value="Red"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                </StackPanel>
+                <StackPanel Grid.Column="3">
+                    <TextBlock Text="Next chunk" HorizontalAlignment="Stretch" Background="LightCoral" TextAlignment="Center"/>
+                    <ItemsControl  ItemsSource="{Binding ListNext}" Margin="2">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Vertical"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type local:DebugCommandItem}">
+                                <TextBlock Text="{Binding Name}" Background="LightBlue" HorizontalAlignment="Stretch" Foreground="Red"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <StackPanel Grid.Column="4" >
+                    <TextBlock Text="Executed files" HorizontalAlignment="Stretch" Background="LightGray" TextAlignment="Center"/>
+                    <ItemsControl ItemsSource="{Binding UndoFilesOnFolder}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
     </Grid>
 </Window>
