@@ -7,4 +7,4 @@ It offers some Command managers to manage the memmory in a way that better suits
 * CappedCountCommandManager: Like CommandManager but with maximum executed commands stored in the stack.
 * DiskCommandManager: Is able to store commands on disk. It sets a maximum size for the stacks in memory and saves on disk the ones that are not needed, loading them when it has to.
 
-![Demo image]([Others/Demo.gif](https://github.com/dideldev/wpf-command-pattern/blob/main/Others/Demo.gif))
+![Demo image](Others/Demo.gif)
