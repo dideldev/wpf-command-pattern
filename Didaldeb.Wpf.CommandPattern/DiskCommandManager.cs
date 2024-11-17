@@ -100,6 +100,12 @@ namespace Dideldev.Wpf.CommandPattern
         {
             cmd.Do(context);
 
+            if (NextUndoneCommands.Count > 0)
+            {
+                NextUndoneCommands.Clear();
+                fileManager.DeleteUndoFiles();
+            }
+
             // Desplazar listas si procede
             if (LastExecutedCommandIndex + 1 >= config.ListSize)
             {
@@ -116,10 +122,11 @@ namespace Dideldev.Wpf.CommandPattern
 
             if (LastExecutedCommandIndex < CurrentCommands.Count - 1)
             {
-                // If the last written is not the the last one on the list, remove the undone commands. 
-                NextUndoneCommands.Clear();
+                // If the last written is not the the last one on the list, remove the undone commands.                 
                 CurrentCommands.RemoveRange(LastExecutedCommandIndex + 1, CurrentCommands.Count - LastExecutedCommandIndex - 1);
             }
+
+           
 
             // Add the executed command.
             CurrentCommands.Add(cmd);

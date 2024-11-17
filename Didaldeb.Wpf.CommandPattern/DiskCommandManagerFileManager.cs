@@ -50,15 +50,33 @@ namespace Dideldev.Wpf.CommandPattern
         /// </summary>
         internal void DeleteAllFiles()
         {
-            foreach (var file in Directory.EnumerateFiles(Folder, $"{UndoPrefix}*"))
-            {
-                File.Delete(file);
-            }
+            DeleteExecFiles();
+            DeleteUndoFiles();
+        }
+
+        /// <summary>
+        /// Delete all files in <see cref="folder"/> which starts with <see cref="ExecPrefix"/>.
+        /// </summary>
+        internal void DeleteExecFiles() {
+            if (!Directory.Exists(Folder))
+                return;
 
             foreach (var file in Directory.EnumerateFiles(Folder, $"{ExecPrefix}*"))
             {
                 File.Delete(file);
             }
+        }
+
+        /// <summary>
+        /// Delete all files in <see cref="folder"/> which starts with <see cref="UndoPrefix"/>.
+        /// </summary>
+        internal void DeleteUndoFiles() {
+            if (!Directory.Exists(Folder)) 
+                return;
+            foreach (var file in Directory.EnumerateFiles(Folder, $"{UndoPrefix}*"))
+            {
+                File.Delete(file);
+            }          
         }
 
         /// <summary>
