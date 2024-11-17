@@ -106,7 +106,7 @@ namespace Dideldev.Wpf.CommandPattern.Demo
                 if (this.model.PressedKey == value)
                     return;
 
-                cmdManager.Do(new SetPressedKeyCommand(model.PressedKey, value, nameof(PressedKey)));
+                cmdManager.Do(new SetPressedKeyCommand(model, value));
                 NotifyChange();
                 UpdateLists();
             }
