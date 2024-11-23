@@ -16,8 +16,9 @@ namespace Dideldev.Wpf.CommandPattern
     /// wiith <see cref="Activator.CreateInstanceFrom(string, string)"/>.
     /// </remarks>
     /// <typeparam name="T">Tpye of the context where the comands operates.</typeparam>
-    public class DiskCommandManager<T> : ICommandManager<T>
+    public class DiskCommandManager<T> : ICommandManager<T>        
         where T : class
+
     {
         /// <summary>
         ///  Configuration of the <see cref="DiskCommandManagerConfig"/>. Folders, files, limits, etc. 
@@ -26,7 +27,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// Must be read only. 
         /// Once the class has created some files it is expected to load files with the same configuration.
         /// </remarks>
-        private readonly DiskCommandManagerConfig config = new();
+        private readonly DiskCommandManagerConfig config;
 
         /// <summary>
         /// Context where the commands opeartes and make changes.
@@ -61,25 +62,31 @@ namespace Dideldev.Wpf.CommandPattern
         /// <summary>
         /// Manager to save and load command list files.
         /// </summary>
-        private readonly DiskCommandManagerFileManager<T> fileManager;
+        private readonly CommandFileManager? fileManager = new ();
 
         /// <summary>
         /// Initializes a new instance of <see cref="DiskCommandManager{T}"/>.
         /// </summary>
+        /// <param name="fileManager">File manager to manage the disk storage.</param>
         /// <param name="context">Context where the commands operates.</param>
         /// <param name="config">Configuration of the command manager behavieur.</param>
-        public DiskCommandManager(T? context = null, DiskCommandManagerConfig? config = null)
+        public DiskCommandManager(            
+            
+            T? context,
+            DiskCommandManagerConfig? config = null)
         {
             this.context = context;
-            this.config = config ?? this.config;
-
-            fileManager = new DiskCommandManagerFileManager<T>(
-                this.config.Folder,
-                this.config.ExecPrefix,
-                this.config.UndoPrefix);
+            this.config = config ?? new DiskCommandManagerConfig();
+            
+            fileManager = new CommandFileManager() { 
+                ExecPrefix = this.config.ExecPrefix,
+                UndoPrefix = this.config.UndoPrefix,
+                Folder = this.config.Folder,
+                Serializer = this.config.Serializer            
+            };
 
             if (!this.config.PreserveFolderState && Directory.Exists(this.config.Folder))
-                fileManager.DeleteAllFiles();
+                this.fileManager.DeleteAllFiles();
         }
 
         /// <summary>
@@ -111,7 +118,7 @@ namespace Dideldev.Wpf.CommandPattern
             {
                 if (PreviousExecutedCommands.Count > 0)
                 {
-                    fileManager.SaveNewExecutedFile(PreviousExecutedCommands);
+                    fileManager.SaveNewExecutedFile(PreviousExecutedCommands.Cast<Command>().ToList());
                 }
 
                 PreviousExecutedCommands = CurrentCommands;
@@ -155,12 +162,12 @@ namespace Dideldev.Wpf.CommandPattern
             {
                 if (NextUndoneCommands.Count > 0)
                 {
-                    fileManager.SaveNewUndoneFile(NextUndoneCommands);
+                    fileManager.SaveNewUndoneFile(NextUndoneCommands.Cast<Command>().ToList());
                 }
 
                 NextUndoneCommands = CurrentCommands;
                 CurrentCommands = PreviousExecutedCommands;
-                PreviousExecutedCommands = fileManager.LoadLastExecutedFile();
+                PreviousExecutedCommands = fileManager.LoadLastExecutedFile().Cast<Command<T>>().ToList();
 
                 LastExecutedCommandIndex = CurrentCommands.Count - 1;
             }
@@ -182,10 +189,10 @@ namespace Dideldev.Wpf.CommandPattern
 
                 // Load next undone commands
                 if (PreviousExecutedCommands.Count > 0)
-                    fileManager.SaveNewExecutedFile(PreviousExecutedCommands);
+                    fileManager.SaveNewExecutedFile(PreviousExecutedCommands.Cast<Command>().ToList());
                 PreviousExecutedCommands = CurrentCommands;
                 CurrentCommands = NextUndoneCommands;
-                NextUndoneCommands = fileManager.LoadNextUndoneFile();
+                NextUndoneCommands = fileManager.LoadNextUndoneFile().Cast<Command<T>>().ToList();
 
                 LastExecutedCommandIndex = -1;
             }

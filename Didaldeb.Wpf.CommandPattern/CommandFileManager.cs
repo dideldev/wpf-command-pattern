@@ -9,40 +9,42 @@ using System.Threading.Tasks;
 namespace Dideldev.Wpf.CommandPattern
 {
     /// <summary>
-    /// Saves and load files used by <see cref="DiskCommandManager{T}"/>.
+    /// Base class for a command file manager defining save an load methods.
     /// </summary>
-    /// <typeparam name="T">Type of the context where the commands operate.</typeparam>
-    internal class DiskCommandManagerFileManager<T>
-        where T : class
+    /// <typeparam name="T">Type of the context where the commands operates.</typeparam>
+    public class CommandFileManager
     {
 
         /// <summary>
-        /// Create a new instance of <see cref="DiskCommandManagerFileManager{T}"/>.
+        /// Create a new instance of <see cref="CommandFileManager{T}"/>.
         /// </summary>
         /// <param name="folder">Folder where the files are stored. </param>
         /// <param name="execPrefix">Prefix that identifies the files which contains executed commands.</param>
         /// <param name="undoPrefix">Prefix that identifies the files which contains undone commands.</param>
-        internal DiskCommandManagerFileManager(string folder, string execPrefix, string undoPrefix)
+        public CommandFileManager()
         {
-            Folder = folder;
-            ExecPrefix = execPrefix;
-            UndoPrefix = undoPrefix;
+
         }
 
         /// <summary>
         /// Get or sets the folder where the files are stored.
         /// </summary>
-        internal string Folder { get; set; } = "temp/rollbacks";
+        public string Folder { get; set; } = "temp/rollbacks";
 
         /// <summary>
         /// Get or sets the prefix that identifies the files which contains executed commands
         /// </summary>
-        internal string ExecPrefix { get; set; } = "E";
+        public string ExecPrefix { get; set; } = "E";
 
         /// <summary>
         /// Get or sets the prefix that identifies the files which contains undone commands
         /// </summary>
-        internal string UndoPrefix { get; set; } = "U";
+        public string UndoPrefix { get; set; } = "U";
+
+        /// <summary>
+        /// Seraizlier use to create and load files containing commands.
+        /// </summary>
+        public CommandFileSerializer Serializer { get; set; } = new JsonCommandSerializer();
 
         /// <summary>
         /// Delete all files in <see cref="folder"/> which starts with
@@ -57,7 +59,8 @@ namespace Dideldev.Wpf.CommandPattern
         /// <summary>
         /// Delete all files in <see cref="folder"/> which starts with <see cref="ExecPrefix"/>.
         /// </summary>
-        internal void DeleteExecFiles() {
+        internal void DeleteExecFiles()
+        {
             if (!Directory.Exists(Folder))
                 return;
 
@@ -70,13 +73,14 @@ namespace Dideldev.Wpf.CommandPattern
         /// <summary>
         /// Delete all files in <see cref="folder"/> which starts with <see cref="UndoPrefix"/>.
         /// </summary>
-        internal void DeleteUndoFiles() {
-            if (!Directory.Exists(Folder)) 
+        internal void DeleteUndoFiles()
+        {
+            if (!Directory.Exists(Folder))
                 return;
             foreach (var file in Directory.EnumerateFiles(Folder, $"{UndoPrefix}*"))
             {
                 File.Delete(file);
-            }          
+            }
         }
 
         /// <summary>
@@ -86,7 +90,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// A list with the commands found in the file.
         /// If no file is found it returns an empty list. 
         /// </returns>
-        internal List<Command<T>> LoadLastExecutedFile()
+        internal List<Command> LoadLastExecutedFile()
         {
             string? file = Directory.EnumerateFiles(Folder, $"{ExecPrefix}*")
                 .OrderBy(f => f)
@@ -105,7 +109,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// A list with the commands found in the file.
         /// If no file is found it returns an empty list. 
         /// </returns>
-        internal List<Command<T>> LoadNextUndoneFile()
+        internal List<Command> LoadNextUndoneFile()
         {
             string? file = Directory.EnumerateFiles(Folder, $"{UndoPrefix}*")
                 .OrderBy(f => f)
@@ -123,24 +127,11 @@ namespace Dideldev.Wpf.CommandPattern
         /// <param name="path">Path of the commands file to be read.</param>
         /// <param name="deleteAfterRead">Once the file is read, deletes the file from disk.</param>
         /// <returns></returns>
-        internal static List<Command<T>> OpenCommandFile(string path, bool deleteAfterRead = true)
+        internal List<Command> OpenCommandFile(string path, bool deleteAfterRead = true)
         {
-            List<Command<T>> list = [];
-            using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
-            {
-                using BinaryReader br = new(fs, Encoding.Unicode);
+            List<Command>  list = Serializer.LoadFile(path);
 
-                string strVersion = br.ReadString();
-                int count = br.ReadInt32();
-
-                for (int i = 0; i < count; i++)
-                {
-                    Command<T> cmd = Command<T>.ReadBytes(br);
-                    list.Add(cmd);
-                }
-            }
-
-            if (deleteAfterRead)
+            if(deleteAfterRead)
                 File.Delete(path);
 
             return list;
@@ -154,29 +145,16 @@ namespace Dideldev.Wpf.CommandPattern
         /// <exception cref="NullReferenceException">
         /// The file should have, at least, the version of this assembly that generated the file.
         /// </exception>
-        internal static void SaveCommandFile(List<Command<T>> commands, string path)
+        internal void SaveCommandFile(List<Command> commands, string path)
         {
-            Version? versionInfo = Assembly.GetExecutingAssembly().GetName().Version;
-            if (versionInfo == null)
-                throw new NullReferenceException("Could not get the version of the executing assembly.");
-
-            using FileStream fs = new(path, FileMode.CreateNew, FileAccess.Write);
-            using BinaryWriter bw = new(fs, Encoding.Unicode);
-
-            bw.Flush();
-            bw.Write(versionInfo.ToString());
-            bw.Write(commands.Count);
-            for (int i = 0; i < commands.Count; i++)
-            {
-                Command<T>.WriteBytes(bw, commands[i]);
-            }
+            Serializer.SaveFile(commands, path);
         }
 
         /// <summary>
         /// Generate the next available name for the file and save the executed commands on a file with that name.
         /// </summary>
         /// <param name="list">List of executed commands to be written in the file.</param>
-        internal void SaveNewExecutedFile(List<Command<T>> list)
+        internal void SaveNewExecutedFile(List<Command> list)
         {
             Directory.CreateDirectory(Folder);
 
@@ -202,7 +180,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// Generate the next available name for the file and save the undone commands on a file with that name.
         /// </summary>
         /// <param name="list">List of undone commands to be written in the file.</param>
-        internal void SaveNewUndoneFile(List<Command<T>> list)
+        internal void SaveNewUndoneFile(List<Command> list)
         {
             string? newFile = Directory.EnumerateFiles(Folder, $"{UndoPrefix}*")
               .OrderBy(f => f)

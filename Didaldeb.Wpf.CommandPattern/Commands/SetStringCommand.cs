@@ -18,7 +18,7 @@ namespace Dideldev.Wpf.CommandPattern.Commands
         {
             
         }
-
+        /*
         public override void ReadParameterBytes(BinaryReader br)
         {
             this.PropertyName = this.PropertyNames![0];
@@ -30,6 +30,6 @@ namespace Dideldev.Wpf.CommandPattern.Commands
         {
             bw.Write((string)OldValue!);
             bw.Write((string)NewValue!);
-        }
+        }*/
     }
 }

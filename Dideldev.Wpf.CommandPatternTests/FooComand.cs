@@ -5,22 +5,25 @@
     /// </summary>
     /// <param name="newValue"></param>
     /// <param name="oldValue"></param>
-    public class FooComand(string newValue = "", string oldValue = "") : Command<FooContext>
+    public class FooComand : Command<FooContext>
     {
-        public string NewValue { get; set; } = newValue;
-        public string OldValue { get; set; } = oldValue;
+        public string NewValue { get; set; } = string.Empty;
+        public string OldValue { get; set; } = string.Empty;
+
+        public FooComand() { }
+
+        public FooComand(string newValue)
+        {
+            this.NewValue = newValue;
+        }
 
         public override void Do(FooContext? Context)
         {
             if (Context == null) return;
+            OldValue = Context.Value;
             Context.Value = NewValue;
         }
 
-        public override void ReadParameterBytes(BinaryReader br)
-        {
-            NewValue = br.ReadString();
-            OldValue = br.ReadString();
-        }
 
         public override void Undo(FooContext? Context)
         {
@@ -28,10 +31,5 @@
             Context.Value = OldValue;
         }
 
-        public override void WriteParameterBytes(BinaryWriter bw)
-        {
-            bw.Write(NewValue);
-            bw.Write(OldValue);
-        }
     }
 }

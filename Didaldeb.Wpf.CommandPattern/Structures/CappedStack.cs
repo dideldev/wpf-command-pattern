@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dideldev.Wpf.CommandPattern
+namespace Dideldev.Wpf.CommandPattern.Structures
 {
     /// <summary>
     /// Defines a stack with a limited size. 
@@ -35,7 +35,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// <param name="maxCount"></param>
         public CappedStack(int maxCount = 1000)
         {
-            this.MaxCount = maxCount;
+            MaxCount = maxCount;
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxCount);
         }
 

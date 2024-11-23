@@ -1,4 +1,6 @@
-﻿namespace Dideldev.Wpf.CommandPattern.Tests
+﻿using Dideldev.Wpf.CommandPattern.Structures;
+
+namespace Dideldev.Wpf.CommandPattern.Tests.Structures
 {
     [TestFixture()]
     public class CappedStackTests

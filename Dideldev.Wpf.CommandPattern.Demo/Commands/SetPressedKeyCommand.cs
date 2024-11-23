@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dideldev.Wpf.CommandPattern.Commands;
+sing Dideldev.Wpf.CommandPattern.CommandsPrimitives;
 
 namespace Dideldev.Wpf.CommandPattern.Demo.Commands
 {
@@ -83,4 +83,5 @@ namespace Dideldev.Wpf.CommandPattern.Demo.Commands
         {
             return $"Key({NewValue})";
         }
+    }
     }

@@ -10,7 +10,7 @@ namespace Dideldev.Wpf.CommandPattern
     /// Basic command manager with stacks for executed and undone commands. 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class CommandManager<T> : ICommandManager<T>
+    public class BasicCommandManager<T> : ICommandManager<T>        
         where T : class
     {
         /// <summary>
@@ -29,18 +29,18 @@ namespace Dideldev.Wpf.CommandPattern
         private readonly Stack<Command<T>> undoneCommands = new();
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommandManager{T}"/>.
+        /// Initializes a new instance of <see cref="BasicCommandManager{T}"/>.
         /// </summary>
-        public CommandManager()
+        public BasicCommandManager()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommandManager{T}"/> with the given context. 
+        /// Initializes a new instance of <see cref="BasicCommandManager{T}"/> with the given context. 
         /// </summary>
         /// <param name="context"></param>
-        public CommandManager(T context)
+        public BasicCommandManager(T context)
         {
             this.context = context;
         }
@@ -72,7 +72,7 @@ namespace Dideldev.Wpf.CommandPattern
         {
             if (executedCommands.Count > 0)
             {
-                Command<T> cmd = executedCommands.Pop();
+                Command<T>? cmd = executedCommands.Pop();
                 cmd.Undo(context);
                 undoneCommands.Push(cmd);
                 return cmd;

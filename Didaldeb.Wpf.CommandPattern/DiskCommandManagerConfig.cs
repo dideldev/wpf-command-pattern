@@ -35,6 +35,11 @@ namespace Dideldev.Wpf.CommandPattern
         /// It indicates to not delete files when initializing so the previous executed / undone commands reamins. 
         /// </summary>
         public bool PreserveFolderState { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the serializer used to save and load Command files. 
+        /// </summary>
+        public CommandFileSerializer Serializer{ get; set; } = new JsonCommandSerializer();
     }
 
 }
