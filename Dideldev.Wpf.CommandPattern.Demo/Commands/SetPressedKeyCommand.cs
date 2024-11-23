@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-sing Dideldev.Wpf.CommandPattern.CommandsPrimitives;
 
 namespace Dideldev.Wpf.CommandPattern.Demo.Commands
 {
     public class SetPressedKeyCommand : Command<Model>
     {
-        private string OldValue { get; set; } = string.Empty;
-        private string NewValue { get; set; } = string.Empty;
+        public string OldValue { get; set; } = string.Empty;
+        public string NewValue { get; set; } = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of <see cref="SetPressedKeyCommand"/> with the given parameters..
@@ -25,9 +24,8 @@ namespace Dideldev.Wpf.CommandPattern.Demo.Commands
         /// <param name="model">Context where the property value are changed.</param>
         /// <param name="newValue">Value to be set to the context. </param>
         /// <param name="propertyName">Property name of the viewmodel that will be raised after Undo this change.</param>
-        public SetPressedKeyCommand(string oldValue, string newValue, string? propertyName = null)
+        public SetPressedKeyCommand( string newValue, string? propertyName = null)
         {
-            this.OldValue = oldValue;
             this.NewValue = newValue;
             if (propertyName != null)
                 this.PropertyNames = [propertyName];
@@ -43,18 +41,10 @@ namespace Dideldev.Wpf.CommandPattern.Demo.Commands
             if (context == null)
                 throw new NullReferenceException(nameof(context));
 
+            this.OldValue = context.PressedKey;
             context.PressedKey = this.NewValue;
         }
 
-        /// <summary>
-        /// Read the bytes on a stream that contains the values to be set to this instance props.
-        /// </summary>
-        /// <param name="br"></param>
-        public override void ReadParameterBytes(BinaryReader br)
-        {
-            OldValue = br.ReadString();
-            NewValue = br.ReadString();
-        }
 
         /// <summary>
         /// Changes the <see cref="Model.PressedKey"/> property to <see cref="oldValue"/>.
@@ -67,16 +57,6 @@ namespace Dideldev.Wpf.CommandPattern.Demo.Commands
                 throw new NullReferenceException(nameof(context));
 
             context.PressedKey = this.OldValue;
-        }
-
-        /// <summary>
-        /// Writes the bytes of this instance props to a stream.
-        /// </summary>
-        /// <param name="br"></param>
-        public override void WriteParameterBytes(BinaryWriter bw)
-        {
-            bw.Write(OldValue);
-            bw.Write(NewValue);
         }
 
         public override string ToString()

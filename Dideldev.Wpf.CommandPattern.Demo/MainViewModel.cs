@@ -106,7 +106,7 @@ namespace Dideldev.Wpf.CommandPattern.Demo
                 if (this.model.PressedKey == value)
                     return;
 
-                cmdManager.Do(new SetPressedKeyCommand(model, value));
+                cmdManager.Do(new SetPressedKeyCommand(value,nameof(PressedKey)));
                 NotifyChange();
                 UpdateLists();
             }
@@ -127,7 +127,7 @@ namespace Dideldev.Wpf.CommandPattern.Demo
                 System.Windows.Media.Color newColor = ((SolidColorBrush)value).Color;
                 if (this.model.Background == newColor)
                     return;
-                cmdManager.Do(new SetBackgroundCommand(model, newColor, nameof(Background)));
+                cmdManager.Do(new SetBackgroundCommand(newColor, nameof(Background)));
                 NotifyChange();
                 UpdateLists();
             }
@@ -148,7 +148,7 @@ namespace Dideldev.Wpf.CommandPattern.Demo
                 System.Windows.Media.Color newColor = ((SolidColorBrush)value).Color;
                 if (this.model.Foreground == newColor)
                     return;
-                cmdManager.Do(new SetForegroundCommand(model, newColor, nameof(Foreground)));
+                cmdManager.Do(new SetForegroundCommand(newColor, nameof(Foreground)));
                 NotifyChange();
                 UpdateLists();
             }
