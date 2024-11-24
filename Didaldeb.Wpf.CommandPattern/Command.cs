@@ -17,7 +17,7 @@ namespace Dideldev.Wpf.CommandPattern
         /// Get or sets the list of properties that might change so the view model may 
         /// notify it.
         /// </summary>
-        public List<string>? PropertyNames { get; set; }
+        public List<string> PropertyNames { get; set; } = [];
 
         /// <summary>
         /// Gets the full name of the current command type. 
